@@ -1,21 +1,8 @@
 import boto3
 from time import sleep
 import configparser
-import os
-import socket
+# import socket
 import sys
-
-
-# import json
-# from datetime import date, datetime
-
-
-# def json_serial(obj):
-#     """JSON serializer for objects not serializable by default json code"""
-
-#     if isinstance(obj, (datetime, date)):
-#         return obj.isoformat()
-#     raise TypeError("Type %s not serializable" % type(obj))
 
 
 def read_user_data_from_local_config():
@@ -30,14 +17,6 @@ def read_user_data_from_local_config():
 
 def create_client():
     client = boto3.client('ec2')
-#     client = EC2Connection(config.get('IAM', 'access'),
-#                            config.get('IAM', 'secret'))
-#     regions = client.get_all_regions()
-#     for r in regions:
-#         if r.name == config.get('EC2', 'region'):
-#             client = EC2Connection(config.get(
-#                 'IAM', 'access'), config.get('IAM', 'secret'), region=r)
-#             return client
     return client
 
 
@@ -58,19 +37,20 @@ def get_existing_instance_by_tag(client):
 
 def list_all_existing_instances(client):
     response = client.describe_instances(
-        Filters=[
-            {
-                'Name': 'image-id',
-                'Values': [config.get('EC2', 'ami')]
-            }
-        ])
+        # Filters=[
+        #     {
+        #         'Name': 'image-id',
+        #         'Values': [config.get('EC2', 'ami')]
+        #     }
+        #]
+    )
     reservations = response['Reservations']
     if len(reservations) > 0:
         r_instances = [
             inst for resv in reservations for inst in resv['Instances']]
         for inst in r_instances:
-            print("Instance Id: %s (%s)" %
-                  (inst['InstanceId'], inst['State']['Name']))
+            print("Instance Id: %s | %s | %s" %
+                  (inst['InstanceId'], inst['InstanceType'], inst['State']['Name']))
 
 
 def get_spot_price(client):
@@ -78,10 +58,6 @@ def get_spot_price(client):
                                                        InstanceTypes=[
                                                            config.get('EC2', 'type')],
                                                        ProductDescriptions=[config.get('EC2', 'product_description')])
-    # with open('data.json', 'w') as outfile:
-    #     json.dump(price_history['SpotPriceHistory'],
-    #               outfile, default=json_serial)
-
     return float(price_history['SpotPriceHistory'][0]['SpotPrice'])
 
 
@@ -165,9 +141,7 @@ def wait_for_up(client, inst):
             print('Waiting...', sleep(10))
 
 
-def main():
-    # Entry
-    action = 'list' if len(sys.argv) == 1 else sys.argv[1]
+def main(action):
     client = create_client()
     if client is None:
         print('Unable to create EC2 client')
@@ -190,13 +164,19 @@ def main():
     elif action == 'stop' and inst is not None:
         destroy_instance(client, inst)
     elif action == 'list':
-        print('Active Spot Instnaces (AMI: %s)' % config.get('EC2', 'ami'))
+        print('EC2 Instnaces:')
         list_all_existing_instances(client)
     else:
         print('No action taken')
 
 
 if __name__ == "__main__":
+
+    action = 'list' if len(sys.argv) == 1 else sys.argv[1]
+    config_file = ''
+    if len(sys.argv) == 3:
+        config_file = sys.argv[2]
+
     config = configparser.ConfigParser()
-    config.read('ec2-spot-instance-config.cfg')
-    main()
+    config.read(config_file)
+    main(action)
