@@ -46,12 +46,12 @@ List of a configure fields
 
 ## Request EC2 Spot Instance
 
-<pre>python main.py start</pre>
+<pre>python main.py start CONFIG_FILE_NAME.cfg</pre>
 
 ## Terminate EC2 Spot Instance
 
-<pre>python main.py stop</pre>
+<pre>python main.py stop CONFIG_FILE_NAME.cfg</pre>
 
 ## List EC2 Instances
 
-<pre>python main.py list</pre>
+<pre>python main.py list CONFIG_FILE_NAME.cfg</pre>
