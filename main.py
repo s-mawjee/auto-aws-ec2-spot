@@ -1,8 +1,9 @@
 import boto3
 from time import sleep
 import configparser
-# import socket
+import socket
 import sys
+import base64
 
 
 def read_user_data_from_local_config():
@@ -62,19 +63,20 @@ def get_spot_price(client):
 
 
 def provision_instance(client, user_data):
+    user_data_encode = (base64.b64encode(user_data.encode())).decode("utf-8") 
     req = client.request_spot_instances(InstanceCount=1,
                                         Type='one-time',
                                         InstanceInterruptionBehavior='terminate',
                                         LaunchSpecification={
-                                            # 'SecurityGroups': [
-                                            #     config.get(
-                                            #         'EC2', 'security_group')
-                                            # ],
+                                            'SecurityGroups': [
+                                                config.get(
+                                                    'EC2', 'security_group')
+                                            ],
                                             'ImageId': config.get('EC2', 'ami'),
                                             'InstanceType': config.get('EC2', 'type'),
                                             'KeyName': config.get('EC2', 'key_pair'),
 
-                                            'UserData': user_data
+                                            'UserData': user_data_encode
                                         },
                                         SpotPrice=config.get('EC2', 'max_bid')
                                         )
@@ -125,20 +127,26 @@ def destroy_instance(client, inst):
 def wait_for_up(client, inst):
     print('Waiting for instance to come up')
     while True:
-        # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if inst['PublicIpAddress'] is None:
             inst = get_existing_instance_by_tag(client)
         try:
             if inst['PublicIpAddress'] is None:
                 print('IP not assigned yet ...')
             else:
-                # s.connect((inst['PublicIpAddress'], 22))
-                # s.shutdown(2)
+                s.connect((inst['PublicIpAddress'], 22))
+                s.shutdown(2)
                 print('Server is up!')
                 print('Server Public IP - %s' % inst['PublicIpAddress'])
                 break
         except:
             print('Waiting...', sleep(10))
+
+# def run_code(client, inst): 
+#     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#     s.connect((inst['PublicIpAddress'], 22))
+#     s.
+
 
 
 def main(action):
