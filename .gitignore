@@ -1,2 +1,4 @@
 .vscode
 ec2-spot-instance-config.cfg
+*.pem
+user_data_file.txt

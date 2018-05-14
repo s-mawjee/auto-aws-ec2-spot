@@ -1,0 +1,5 @@
+#!/bin/bash
+git clone GIT_URL
+cd CHANGE_TO_FOLDER
+pip install -e . 
+python CODE_FILE.py
