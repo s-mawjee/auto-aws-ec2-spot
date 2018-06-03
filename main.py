@@ -63,7 +63,7 @@ def get_spot_price(client):
 
 
 def provision_instance(client, user_data):
-    user_data_encode = (base64.b64encode(user_data.encode())).decode("utf-8") 
+    user_data_encode = (base64.b64encode(user_data.encode())).decode("utf-8")
     req = client.request_spot_instances(InstanceCount=1,
                                         Type='one-time',
                                         InstanceInterruptionBehavior='terminate',
@@ -142,11 +142,10 @@ def wait_for_up(client, inst):
         except:
             print('Waiting...', sleep(10))
 
-# def run_code(client, inst): 
+# def run_code(client, inst):
 #     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #     s.connect((inst['PublicIpAddress'], 22))
 #     s.
-
 
 
 def main(action):
