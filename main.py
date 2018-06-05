@@ -138,6 +138,8 @@ def wait_for_up(client, inst):
                 s.shutdown(2)
                 print('Server is up!')
                 print('Server Public IP - %s' % inst['PublicIpAddress'])
+                print('ssh -i', config.get('EC2', 'key_pair') + '.pem',
+                      'ec2-user@' + inst['PublicDnsName'])
                 break
         except:
             print('Waiting...', sleep(10))
@@ -179,8 +181,8 @@ def main(action):
 
 if __name__ == "__main__":
 
-    action = 'list' if len(sys.argv) == 1 else sys.argv[1]
-    config_file = ''
+    action = 'stop' if len(sys.argv) == 1 else sys.argv[1]
+    config_file = 'ec2-spot-instance-config.cfg'
     if len(sys.argv) == 3:
         config_file = sys.argv[2]
 
