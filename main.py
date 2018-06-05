@@ -140,7 +140,7 @@ def wait_for_up(client, inst):
                 print('Server Public IP - %s' % inst['PublicIpAddress'])
 
                 print('ssh -i', '"' + config.get('EC2', 'key_pair') + '.pem' + '"',
-                      'ec2-user@' + inst['PublicDnsName'])
+                      config.get('EC2', 'username') + inst['PublicDnsName'])
                 break
         except:
             print('Waiting...', sleep(10))
